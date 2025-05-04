@@ -44,6 +44,7 @@ export default class DungeonFloor {
             })
             this.corridors.add(new Corridor(parseInt(corridoKey, 10), corridorData.tiles));
         }
+        this.connectCorridors();
     }
 
     generate(num: number): void {
@@ -57,6 +58,24 @@ export default class DungeonFloor {
         for (let i = 0; i < numberRooms; ++i){
             this.rooms.add(new Room(i, this.getAvailableRoom()))
         };
+    }
+
+    private connectCorridors() {
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                if (this.grid[y][x]?.getType() === "Corridor") {
+                    this.connectCorridorTile(this.grid[y][x] as Tile)
+                }
+            }
+        }
+    }
+
+    private connectCorridorTile(tile: Tile) {
+        const pos = tile.getPosition();
+        if (this.getTile({ x: pos.x, y: pos.y + 1 })?.getType() === "Corridor") tile.connectTiles("N");
+        if (this.getTile({ x: pos.x + 1, y: pos.y })?.getType() === "Corridor") tile.connectTiles("E");
+        if (this.getTile({ x: pos.x, y: pos.y - 1 })?.getType() === "Corridor") tile.connectTiles("S");
+        if (this.getTile({ x: pos.x - 1, y: pos.y })?.getType() === "Corridor") tile.connectTiles("W");
     }
 
     getAvailableRoom(): PositionXY[] {

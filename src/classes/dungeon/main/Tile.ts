@@ -63,4 +63,13 @@ export default class Tile {
     setStyle(style: TileStyle): void {
       this.style = style;
     }
+
+    getGrid():Grid3x3  {
+        return this.grid
+    }
+
+    isGridOcupied(tileId: CoordinatesType):boolean  {
+        if (this.grid[tileId]) return true;
+        return false
+    }
 }
