@@ -32,6 +32,16 @@ export default class DungeonFloor {
             })
             this.rooms.add(new Room(parseInt(roomKey, 10), roomData.tiles));
         }
+
+        this.corridors = new Set();
+
+        for (const [corridoKey, corridorData] of Object.entries(data.corridors)) {
+            const tiles = corridorData.tiles;
+            tiles.map((tile) => {
+                this.setTile(tile.x, tile.y, "Corridor");
+            })
+            this.corridors.add(new Corridor(parseInt(corridoKey, 10), corridorData.tiles));
+        }
     }
 
     generate(num: number): void {

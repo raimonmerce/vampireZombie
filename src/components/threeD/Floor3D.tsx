@@ -22,4 +22,3 @@ export default function Floor3D({floor}: Floor3DProps) {
     </>
   )
 }
-

@@ -1,5 +1,5 @@
 import Tile from '../../classes/dungeon/main/Tile'
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {sizeTile} from "../../constants"
 
 type Tile3DProps = {
@@ -7,6 +7,16 @@ type Tile3DProps = {
 }
 
 export default function Tile3D({tile}: Tile3DProps) {
+  const [color, setColor] = useState<string>("red");
+  const [size, setSize] = useState<number>(sizeTile);
+
+  useEffect(() => {
+    if (tile.getType() === "Room") setColor("red"); 
+    else {
+      setSize(sizeTile/3)
+      setColor("brown");
+    }    
+  }, [tile])
   return (
     <>
       <mesh 
@@ -17,8 +27,8 @@ export default function Tile3D({tile}: Tile3DProps) {
       ]}
       rotation={[-Math.PI/2,0,0]}
       >
-        <planeGeometry args={[sizeTile,sizeTile]}/>
-        <meshBasicMaterial color={"red"}/>
+        <planeGeometry args={[size,size]}/>
+        <meshBasicMaterial color={color}/>
       </mesh>
 
     </>
