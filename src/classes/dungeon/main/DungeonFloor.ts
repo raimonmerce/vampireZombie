@@ -72,10 +72,19 @@ export default class DungeonFloor {
 
     private connectCorridorTile(tile: Tile) {
         const pos = tile.getPosition();
-        if (this.getTile({ x: pos.x, y: pos.y + 1 })?.getType() === "Corridor") tile.connectTiles("N");
-        if (this.getTile({ x: pos.x + 1, y: pos.y })?.getType() === "Corridor") tile.connectTiles("E");
-        if (this.getTile({ x: pos.x, y: pos.y - 1 })?.getType() === "Corridor") tile.connectTiles("S");
-        if (this.getTile({ x: pos.x - 1, y: pos.y })?.getType() === "Corridor") tile.connectTiles("W");
+      
+        const northTile = this.getTile({ x: pos.x, y: pos.y + 1 });
+        const eastTile  = this.getTile({ x: pos.x + 1, y: pos.y });
+        const southTile = this.getTile({ x: pos.x, y: pos.y - 1 });
+        const westTile  = this.getTile({ x: pos.x - 1, y: pos.y });
+      
+        const connectsTo = (tile: Tile | null | undefined) =>
+            tile?.getType() === "Corridor" || tile?.getType() === "Room";
+      
+        if (connectsTo(northTile)) tile.connectTiles("N");
+        if (connectsTo(eastTile))  tile.connectTiles("E");
+        if (connectsTo(southTile)) tile.connectTiles("S");
+        if (connectsTo(westTile))  tile.connectTiles("W");
     }
 
     getAvailableRoom(): PositionXY[] {
