@@ -19,6 +19,10 @@ export default function Dungeon3D({ dungeon }: Dungeon3DProps) {
 
   return (
     <>
+      <mesh>
+        <boxGeometry/>
+        <meshBasicMaterial color={"blue"}/>
+      </mesh>
       {rooms.map((room, index) => (
         <Room3D key={index} room={room} />
       ))}

@@ -2,14 +2,20 @@ import './App.css'
 import Dungeon from './classes/dungeon/main/Dungeon'
 import { useState } from 'react';
 import Main from './components/threeD/Main';
+import precreated from "./assets/precreated/dungeon.json" with { type: "json" };
+import {DungeonData} from "./types"
 
 function App() {
   const [dungeon, setDungeon] = useState<Dungeon | null>(null)
   const handleOnClick = () => {
-    const newDungeon = new Dungeon(2, 10, 10);
-    newDungeon.generate();
-    newDungeon.getFloor(0).print();
-    setDungeon(newDungeon)
+    const dungeonData = precreated as DungeonData;
+    const dungeonEntity = new Dungeon();
+    dungeonEntity.load(dungeonData);
+    console.log(dungeonData);
+    dungeonEntity.getFloor(0).print();
+    console.log("A");
+    setDungeon(dungeonEntity)
+    console.log("B");
   }
 
   return (

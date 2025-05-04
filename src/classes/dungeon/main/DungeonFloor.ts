@@ -1,28 +1,50 @@
 import Room from "./Room"
 import Corridor from "./Corridor"
 import {PositionXY, TileType} from "../../../types"
+import {minRooms, maxRooms, minWidthRoom, maxHeigthRoom} from "../../../constants"
+import {getRandomElementFronRange} from "../../../utils"
+import {DungeonFloorData} from "../../../types"
 
 export default class DungeonFloor {
+    private roomNumber: number = 0;
     private rooms: Set<Room> = new Set();
     private corridors: Set<Corridor> = new Set();
-    private grid: TileType[][];
-    private width: number;
-    private height: number;
+    private grid: TileType[][] = [];
+    private width: number = 0;
+    private height: number = 0;
 
-    constructor(
-        width: number,
-        height: number,
-        numberRooms: number
-    ) {
-        this.height = height;
-        this.width = width;
-        this.grid = Array.from({ length: height }, () =>
-            Array.from({ length: width }, () => null)
+    constructor() {}
+
+    load(num: number, data: DungeonFloorData): void {
+        this.roomNumber = num;
+        this.height = data.height;
+        this.width = data.width;
+        this.grid = Array.from({ length: this.height }, () =>
+            Array.from({ length: this.width }, () => null)
         );
+
+        this.rooms = new Set();
+
+        for (const [roomKey, roomData] of Object.entries(data.rooms)) {
+            const tiles = roomData.tiles;
+            tiles.map((tile) => {
+                this.setTile(tile.x, tile.y, "Room");
+            })
+            this.rooms.add(new Room(parseInt(roomKey, 10), roomData.tiles));
+        }
+    }
+
+    generate(num: number): void {
+        this.roomNumber = num;
+        this.height = getRandomElementFronRange(minWidthRoom, maxHeigthRoom);
+        this.width = getRandomElementFronRange(minWidthRoom, maxHeigthRoom);
+        this.grid = Array.from({ length: this.height }, () =>
+            Array.from({ length: this.width }, () => null)
+        );
+        const numberRooms = getRandomElementFronRange(minRooms, maxRooms)
         for (let i = 0; i < numberRooms; ++i){
-            this.rooms.add(new Room(this.getAvailableRoom()))
+            this.rooms.add(new Room(i, this.getAvailableRoom()))
         };
-        this.connectRooms();
     }
 
     getAvailableRoom(): PositionXY[] {
