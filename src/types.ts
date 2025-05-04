@@ -1,3 +1,5 @@
+import Tile from './classes/dungeon/main/Tile';
+
 export type PositionXY = {
     x: number,
     y: number
@@ -18,6 +20,8 @@ export type CoordinatesType =
 export type Grid3x3 = Record<CoordinatesType, SubtileType>;
 
 export type TileType = null | "Room" | "Corridor";
+
+export type TileGrid = null | Tile;
 
 export type SubtileType = null | "Floor" | "Other";
 

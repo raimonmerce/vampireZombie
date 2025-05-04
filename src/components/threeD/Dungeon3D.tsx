@@ -1,9 +1,9 @@
 import Dungeon from '../../classes/dungeon/main/Dungeon';
+import DungeonFloor from '../../classes/dungeon/main/DungeonFloor';
 import Room from '../../classes/dungeon/main/Room';
 import Corridor from '../../classes/dungeon/main/Corridor';
 import { useEffect, useState } from 'react';
-import Room3D from './Room3D';
-import Corridor3D from './Corridor3D';
+import Tile3D from './Tile3D';
 
 type Dungeon3DProps = {
   dungeon: Dungeon;
@@ -12,15 +12,19 @@ type Dungeon3DProps = {
 export default function Dungeon3D({ dungeon }: Dungeon3DProps) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [corridors, setCorridors] = useState<Corridor[]>([]);
+  const [currentFloor, setCurrentFloor] = useState<DungeonFloor>();
 
   useEffect(() => {
-    const dungeonFloor = dungeon.getFloor(0);
+    const dungeonFloor = dungeon.getFloor(0) as DungeonFloor;
     if (!dungeonFloor) return;
+    setCurrentFloor(dungeonFloor)
     const loadedRooms = dungeonFloor.getRooms();
     setRooms(loadedRooms);
     const loadedCorridors = dungeonFloor.getCorridor();
     setCorridors(loadedCorridors);
   }, [dungeon]);
+
+  if (!currentFloor) return;
 
   return (
     <>
@@ -28,11 +32,23 @@ export default function Dungeon3D({ dungeon }: Dungeon3DProps) {
         <boxGeometry/>
         <meshBasicMaterial color={"blue"}/>
       </mesh>
-      {rooms.map((room, index) => (
-        <Room3D key={index} room={room} />
+      {rooms.map((room) => (
+        room.getFloor().getTiles().map((position, index) => {
+          const tile = currentFloor.getTile(position)
+          if (!tile) return;
+          return (
+            <Tile3D key={index} tile={tile} />
+          )
+        })
       ))}
-      {corridors.map((corridor, index) => (
-        <Corridor3D key={index} corridor={corridor} />
+      {corridors.map((corridor) => (
+        corridor.getTiles().map((position, index) => {
+          const tile = currentFloor.getTile(position)
+          if (!tile) return;
+          return (
+            <Tile3D key={index} tile={tile} />
+          )
+        })
       ))}
     </>
   );

@@ -1,6 +1,7 @@
 import Room from "./Room"
 import Corridor from "./Corridor"
-import {PositionXY, TileType} from "../../../types"
+import Tile from "./Tile"
+import {PositionXY, TileGrid} from "../../../types"
 import {minRooms, maxRooms, minWidthRoom, maxHeigthRoom} from "../../../constants"
 import {getRandomElementFronRange} from "../../../utils"
 import {DungeonFloorData} from "../../../types"
@@ -9,7 +10,7 @@ export default class DungeonFloor {
     private roomNumber: number = 0;
     private rooms: Set<Room> = new Set();
     private corridors: Set<Corridor> = new Set();
-    private grid: TileType[][] = [];
+    private grid: TileGrid[][] = [];
     private width: number = 0;
     private height: number = 0;
 
@@ -28,7 +29,8 @@ export default class DungeonFloor {
         for (const [roomKey, roomData] of Object.entries(data.rooms)) {
             const tiles = roomData.tiles;
             tiles.map((tile) => {
-                this.setTile(tile.x, tile.y, "Room");
+                this.setTile(tile, new Tile(tile, "Room", "Stone"));
+                //new Tile(position, "Room", "Stone")
             })
             this.rooms.add(new Room(parseInt(roomKey, 10), roomData.tiles));
         }
@@ -38,7 +40,7 @@ export default class DungeonFloor {
         for (const [corridoKey, corridorData] of Object.entries(data.corridors)) {
             const tiles = corridorData.tiles;
             tiles.map((tile) => {
-                this.setTile(tile.x, tile.y, "Corridor");
+                this.setTile(tile, new Tile(tile, "Corridor", "Wood"));
             })
             this.corridors.add(new Corridor(parseInt(corridoKey, 10), corridorData.tiles));
         }
@@ -63,17 +65,16 @@ export default class DungeonFloor {
             const tile = this.getRandomEmptyTile();
             if (!tile) break;
         
-            const { x, y } = tile;
-            if (!this.hasAdjacentRoom(x, y)) {
-                this.setTile(x, y, "Room");
-                return [{ x, y }];
+            if (!this.hasAdjacentRoom(tile)) {
+                this.setTile(tile, new Tile(tile, "Room", "Stone"));
+                return [tile];
             }
         }
       
         throw new Error("No valid position found for a new room.");
     }
 
-    private hasAdjacentRoom(x: number, y: number): boolean {
+    private hasAdjacentRoom(pos: PositionXY): boolean {
         const directions = [
             { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 },
             { dx: -1, dy: 0 },                   { dx: 1, dy: 0 },
@@ -81,8 +82,10 @@ export default class DungeonFloor {
         ];
       
         return directions.some(({ dx, dy }) => {
-            const tile = this.getTile(x + dx, y + dy);
-            return tile === "Room";
+            const x = pos.x + dx;
+            const y = pos.y + dy;
+            const tile = this.getTile({x,y});
+            return tile?.getType() === "Room";
         });
     }
 
@@ -108,7 +111,7 @@ export default class DungeonFloor {
     }
 
     public connectRooms(): void {
-        const roomCenters = Array.from(this.rooms).map(r => r.getFloor().getTiles()[0].getPosition());
+        const roomCenters = Array.from(this.rooms).map(r => r.getFloor().getTiles()[0]);
         const connected: PositionXY[] = [roomCenters[0]];
         const unconnected = roomCenters.slice(1);
       
@@ -143,16 +146,16 @@ export default class DungeonFloor {
       
         // Try horizontal first
         while (x !== to.x) {
-            if (this.getTile(x, y) === "Corridor") return false;
+            if (this.getTile(from)?.getType() === "Corridor") return false;
             x += x < to.x ? 1 : -1;
         }
       
         while (y !== to.y) {
-            if (this.getTile(x, y) === "Corridor") return false;
+            if (this.getTile(from)?.getType() === "Corridor") return false;
             y += y < to.y ? 1 : -1;
         }
       
-        return this.getTile(x, y) !== "Corridor";
+        return this.getTile(from)?.getType() !== "Corridor";
     }
 
     private drawCorridor(from: PositionXY, to: PositionXY): void {
@@ -160,26 +163,26 @@ export default class DungeonFloor {
         let y = from.y;
       
         while (x !== to.x) {
-            this.setTile(x, y, "Corridor");
+            this.setTile(from, new Tile(from, "Corridor", "Wood"));
             x += x < to.x ? 1 : -1;
         }
       
         while (y !== to.y) {
-            this.setTile(x, y, "Corridor");
+            this.setTile(from, new Tile(from, "Corridor", "Wood"));
             y += y < to.y ? 1 : -1;
         }
       
-        this.setTile(x, y, "Corridor");
+        this.setTile(from, new Tile(from, "Corridor", "Wood"));
     }
 
-    getTile(x: number, y: number): TileType | undefined {
-        if (y < 0 || y >= this.height || x < 0 || x >= this.width) return undefined;
-        return this.grid[y][x];
+    getTile(pos: PositionXY): TileGrid | undefined {
+        if (pos.y < 0 || pos.y >= this.height || pos.x < 0 || pos.x >= this.width) return undefined;
+        return this.grid[pos.y][pos.x];
     }
     
-    setTile(x: number, y: number, type: TileType): void {
-        if (y >= 0 && y < this.height && x >= 0 && x < this.width) {
-          this.grid[y][x] = type;
+    setTile(pos: PositionXY, type: TileGrid): void {
+        if (pos.y >= 0 && pos.y < this.height && pos.x >= 0 && pos.x < this.width) {
+          this.grid[pos.y][pos.x] = type;
         }
     }
 
@@ -214,8 +217,8 @@ export default class DungeonFloor {
         for (let y = 0; y < this.height; y++) {
             let row = '.';
             for (let x = 0; x < this.width; x++) {
-                const tile = this.getTile(x, y);
-                switch (tile) {
+                const tile = this.getTile({x, y});
+                switch (tile?.getType()) {
                 case "Room":
                     row += 'R';
                     break;

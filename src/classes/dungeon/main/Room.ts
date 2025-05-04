@@ -2,7 +2,6 @@ import Floor from "./Floor"
 import Wall from "./Wall"
 import Door from "./Door"
 import Roof from "./Roof"
-import Tile from "./Tile"
 import { PositionXY} from "../../../types";
 
 export default class Room {
@@ -18,7 +17,7 @@ export default class Room {
         this.positions = positions;
         this.floor = new Floor();
         this.positions.map((position: PositionXY) => {
-            this.floor.addTile(new Tile(position, "Room", "Stone")) 
+            this.floor.addTile(position) 
         })
         this.roof = new Roof();
     }

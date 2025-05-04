@@ -1,14 +1,14 @@
-import Tile from "./Tile"
+import { PositionXY } from "../../../types";
 
 export default class Floor {
-    private tiles: Set<Tile> = new Set();
+    private tilePositions: Set<PositionXY> = new Set();
     constructor() {}
 
-    addTile(tile: Tile): void {
-        this.tiles.add(tile);
+    addTile(tilePosition: PositionXY): void {
+        this.tilePositions.add(tilePosition);
     }
 
-    getTiles(): Tile[] {
-        return Array.from(this.tiles);
+    getTiles(): PositionXY[] {
+        return Array.from(this.tilePositions);
     }
 }

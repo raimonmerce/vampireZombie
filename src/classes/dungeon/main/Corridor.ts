@@ -1,17 +1,16 @@
 import { PositionXY} from "../../../types";
-import Tile from "./Tile"
 
 export default class Corridor {
     private roomId: number;
-    private tiles: Set<Tile> = new Set();
+    private tiles: Set<PositionXY> = new Set();
     constructor(id: number, positions: PositionXY[]) {
         this.roomId = id;
         positions.map((position: PositionXY) => {
-            this.tiles.add(new Tile(position, "Corridor", "Wood")) 
+            this.tiles.add(position); 
         })
     }
 
-    getTiles(): Tile[] {
+    getTiles(): PositionXY[] {
         return Array.from(this.tiles);
     }
 }
